@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  dbantrian:
+    image: postgres:13.3
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=Admin123_
+      - POSTGRES_DB=antrian
+      - TZ=Asia/Bangkok
+    volumes:
+      - dbantrian_data:/var/lib/postgresql/data/
+    networks:
+      - dbantrian-network
+    ports:
+      - "5435:5432"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 5s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      retries: 2
+      start_period: 2s
+      timeout: 10s
+
+networks:
+  dbantrian-network:
+    external: true
+
+volumes:
+  dbantrian_data:
+    external: true
+    name: dbantrian_data
+

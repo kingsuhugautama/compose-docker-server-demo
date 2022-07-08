@@ -1,0 +1,23 @@
+docker service update --with-registry-auth=true \
+--env-add=TZ=Asia/Bangkok \
+--env-add=ASPNETCORE_ENVIRONMENT=Development \
+--env-add=ServerIp=134.209.102.123 \
+--publish-add=5003:80 \
+--replicas 1 \
+--image='dockerhiscis/farmasi-api:demo-latest' \
+--update-parallelism 2 \
+--update-order='start-first' \
+--update-failure-action='rollback' \
+--update-delay 20s \
+--rollback-parallelism 0 \
+--rollback-order=stop-first \
+--restart-condition='on-failure' \
+--restart-delay 5s \
+--restart-max-attempts 3 \
+--restart-window 120s \
+--health-cmd='curl --fail http://localhost:80/health || exit 1' \
+--health-interval 5s \
+--health-retries 2 \
+--health-start-period 2s \
+--health-timeout 10s \
+his_farmasi_api

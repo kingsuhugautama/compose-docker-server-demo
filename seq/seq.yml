@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  seq:
+    image: datalust/seq:2021.4
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORDHASH=FBPc5qb5r9gr4y9FEt/8wRr1BDYew1bXbLw3FXrwe6OhdV3+bQ==
+      - TZ=Asia/Bangkok
+    volumes:
+      - seq_data:/data
+    networks:
+      - seq-network
+    ports:
+      - "8282:80"
+      - "5341:5341"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+
+networks:
+  seq-network:
+    external: true
+
+volumes:
+  seq_data:
+    external: true
+    name: seq_data
+

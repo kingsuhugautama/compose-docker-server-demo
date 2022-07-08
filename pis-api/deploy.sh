@@ -1,0 +1,32 @@
+docker service update --with-registry-auth=true \
+--env-add=TZ=Asia/Bangkok \
+--env-add=ASPNETCORE_ENVIRONMENT=Development \
+--env-add=DatabaseSettings:ConnectionString='Server=dbpis;Port=5432;Database=pis;User Id=admin;Password=semaranG2022_;' \
+--env-add=BridgeSettings:username=superadmin \
+--env-add=BridgeSettings:password=semarang2021 \
+--env-add=BridgeSettings:apptipe=W \
+--env-add=MinioSettings:ip=134.209.102.123:9090 \
+--env-add=MinioSettings:accessKey=12345678 \
+--env-add=MinioSettings:secretKey=12345678 \
+--env-add=RABBIT_SETTINGS:host=rabbitmq://rabbitmq/ \
+--env-add=RABBIT_SETTINGS:username=admin \
+--env-add=RABBIT_SETTINGS:password=1234 \
+--publish-add=5002:80 \
+--replicas 1 \
+--image='dockerhiscis/pis-api:demo-latest' \
+--update-parallelism 2 \
+--update-order='start-first' \
+--update-failure-action='rollback' \
+--update-delay 5s \
+--rollback-parallelism 0 \
+--rollback-order=stop-first \
+--restart-condition='any' \
+--restart-delay 5s \
+--restart-max-attempts 3 \
+--restart-window 120s \
+--health-cmd='curl --fail http://localhost:80/health || exit 1' \
+--health-interval 5s \
+--health-retries 2 \
+--health-start-period 2s \
+--health-timeout 10s \
+his_pis_api

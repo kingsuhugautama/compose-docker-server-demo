@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+  pis_api:
+    image: dockerhiscis/pis_api:latest
+    depends_on:
+      - dbpis
+      - seq
+      - minio_server
+      - rabbitmq
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "DatabaseSettings:ConnectionString=Server=dbpis;Port=5432;Database=pis;User Id=admin;Password=semaranG2022_;"
+      - "BridgeSettings:username=superadmin"
+      - "BridgeSettings:password=semarang2021"
+      - "BridgeSettings:apptipe=W"
+      - "MinioSettings:ip=minio_server:9000"
+      - "MinioSettings:user=12345678"
+      - "MinioSettings:password=12345678"
+      - "RABBIT_SETTINGS:host=rabbitmq://rabbitmq/"
+      - "RABBIT_SETTINGS:username=admin"
+      - "RABBIT_SETTINGS:password=1234"
+      - TZ=Asia/Bangkok
+    ports:
+      - "5002:80"
+    networks:
+      - api-network
+      - dbpis-network
+      - rabbit-network
+      - sagamachine-network
+      - seq-network
+      - minio-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 5s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: curl --fail http://localhost:80/health || exit 1
+      interval: 5s
+      retries: 2
+      start_period: 2s
+      timeout: 10s
+
+networks:
+  api-network:
+    external: true
+  dbpis-network:
+    external: true
+  rabbit-network:
+    external: true
+  sagamachine-network:
+    external: true
+  seq-network:
+    external: true
+  minio-network:
+    external: true
+

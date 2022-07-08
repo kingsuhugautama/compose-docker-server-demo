@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.8.16-management
+    hostname: rabbitmq
+    environment:
+      - TZ=Asia/Bangkok
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=1234
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+      - rabbitmq_log:/var/log/rabbitmq
+    networks:
+      - rabbit-network
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 5s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      retries: 2
+      start_period: 2s
+      timeout: 30s
+
+networks:
+  rabbit-network:
+    external: true
+
+volumes:
+  rabbitmq_data:
+    external: true
+    name: rabbitmq_data
+  rabbitmq_log:
+    external: true
+    name: rabbitmq_log
+

@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  sagastatemachine:
+    image: dockerhiscis/sagastatemachine:demo-latest
+    depends_on:
+      - rabbitmq
+    environment:
+      - TZ=Asia/Bangkok
+    networks:
+      - rabbit-network
+      - sagadb-network
+      - sagamachine-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 5s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: curl --fail http://localhost:80/health || exit 1
+      interval: 5s
+      retries: 2
+      start_period: 2s
+      timeout: 30s
+
+networks:
+  rabbit-network:
+    external: true
+  sagamachine-network:
+    external: true
+  sagadb-network:
+    external: true
+

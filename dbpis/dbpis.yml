@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  dbpis:
+    image: postgres:13.3
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=semaranG2022_
+      - POSTGRES_DB=pis
+      - TZ=Asia/Bangkok
+    volumes:
+      - dbpis_data:/var/lib/postgresql/data/
+    networks:
+      - dbpis-network
+    ports:
+      - "5433:5432"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        parallelism: 2
+        order: start-first
+        failure_action: rollback
+        delay: 5s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d pis -U admin"]
+      interval: 5s
+      retries: 2
+      start_period: 2s
+      timeout: 10s
+
+networks:
+  dbpis-network:
+    external: true
+
+volumes:
+  dbpis_data:
+    external: true
+    name: dbpis_data
+
