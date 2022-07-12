@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   pis_api:
-    image: dockerhiscis/pis_api:latest
+    image: dockerhiscis/pis-api:latest
     depends_on:
       - dbpis
       - seq
